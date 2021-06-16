@@ -1,14 +1,12 @@
 # for loading json files
 import json
-import seaborn as sns
-import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import datetime
+import matplotlib.dates as mdates
+from datetime import datetime
 
-#to do - customising/formatting - smaller label size
-#inc manipulate data to make more attractive. divide y / 1000 and add doses in 1000
-#change date - 21 May and add 2021 in x label - use a date formatter
-#rationalise - repeat a lot e.g. pop and reverse
+#To do: rationalise - repeat a lot e.g. pop and reverse
 
 def main():
     first_vac = get_vaccine_data("First")
@@ -27,27 +25,40 @@ def main():
         second_values.reverse()
         second_values.pop(0)
         width = 0.35
-        fig, ax = plt.subplots()
-        ax.bar(first_keys, first_values, width, label="First Dose")
-        ax.bar(first_keys, second_values, width, bottom=first_values, label="Second Dose")
-        ax.set_ylabel("Doses")
-        ax.set_title("COVID19 Vaccines given in the UK")
-        plt.xticks(rotation=80)
-        ax.legend()
+        fig, axs = plt.subplots(constrained_layout=True)
+        axs.bar(first_keys, first_values, width, label="First Dose")
+        axs.bar(first_keys, second_values, width, bottom=first_values, label="Second Dose")
+        axs.set_ylabel("Doses (in 1000s)")
+        axs.set_title("COVID19 Vaccines given in the UK")
+        axs.legend()
+        locator = mdates.AutoDateLocator()
+        formatter = mdates.ConciseDateFormatter(locator)
+        axs.xaxis.set_major_locator(locator)
+        axs.xaxis.set_major_formatter(formatter)
         plt.show()
 
     else:
         print("Error: dates across files do not match.")
 
+
+def format_date(str_date):
+    date_obj = datetime.strptime(str_date, '%Y-%m-%d')
+    date = date_obj.date()
+    return date
+
+
 def get_vaccine_data(vac_num):
     file = json.load(open(vac_num + '-vac.json'))
     new_file = {}
     for item in file["data"]:
+        str_date = item["date"]
+        date = format_date(str_date)
         if item["newPeopleVaccinated" + vac_num + "DoseByPublishDate"] is not None:
-            new_file[item["date"]] = int(item["newPeopleVaccinated" + vac_num + "DoseByPublishDate"])
+            new_file[date] = int(item["newPeopleVaccinated" + vac_num + "DoseByPublishDate"]) / 1000
         elif item["newPeopleVaccinated" + vac_num + "DoseByPublishDate"] is None:
-            new_file[item["date"]] = int(0)
+            new_file[date] = int(0)
     return new_file
+
 
 if __name__ == '__main__':
     main()
