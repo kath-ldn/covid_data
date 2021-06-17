@@ -1,40 +1,60 @@
-# for loading json files
+# Imports required libraries
 import requests
 import matplotlib.pyplot as plt
-import datetime
 import matplotlib.dates as mdates
+import datetime
 from datetime import datetime
 
-FIRST_VAC_API = requests.get(str("https://coronavirus.data.gov.uk/api/v1/data?filters=areaType=overview&structure=%7B%22areaType%22:%22areaType%22,%22areaName%22:%22areaName%22,%22areaCode%22:%22areaCode%22,%22date%22:%22date%22,%22newPeopleVaccinatedFirstDoseByPublishDate%22:%22newPeopleVaccinatedFirstDoseByPublishDate%22,%22cumPeopleVaccinatedFirstDoseByPublishDate%22:%22cumPeopleVaccinatedFirstDoseByPublishDate%22%7D&format=json"))
-SECOND_VAC_API = requests.get(str("https://coronavirus.data.gov.uk/api/v1/data?filters=areaType=overview&structure=%7B%22areaType%22:%22areaType%22,%22areaName%22:%22areaName%22,%22areaCode%22:%22areaCode%22,%22date%22:%22date%22,%22newPeopleVaccinatedSecondDoseByPublishDate%22:%22newPeopleVaccinatedSecondDoseByPublishDate%22,%22cumPeopleVaccinatedSecondDoseByPublishDate%22:%22cumPeopleVaccinatedSecondDoseByPublishDate%22%7D&format=json"))
+# Constants to hold API urls
+FIRST_VAC_API = requests.get(str("https://coronavirus.data.gov.uk/api/v1/data?filters=areaType=overview&structure=%7B"
+                                 "%22areaType%22:%22areaType%22,%22areaName%22:%22areaName%22,"
+                                 "%22areaCode%22:%22areaCode%22,%22date%22:%22date%22,"
+                                 "%22newPeopleVaccinatedFirstDoseByPublishDate%22"
+                                 ":%22newPeopleVaccinatedFirstDoseByPublishDate%22,"
+                                 "%22cumPeopleVaccinatedFirstDoseByPublishDate%22"
+                                 ":%22cumPeopleVaccinatedFirstDoseByPublishDate%22%7D&format=json"))
+SECOND_VAC_API = requests.get(str("https://coronavirus.data.gov.uk/api/v1/data?filters=areaType=overview&structure"
+                                  "=%7B%22areaType%22:%22areaType%22,%22areaName%22:%22areaName%22,"
+                                  "%22areaCode%22:%22areaCode%22,%22date%22:%22date%22,"
+                                  "%22newPeopleVaccinatedSecondDoseByPublishDate%22"
+                                  ":%22newPeopleVaccinatedSecondDoseByPublishDate%22,"
+                                  "%22cumPeopleVaccinatedSecondDoseByPublishDate%22"
+                                  ":%22cumPeopleVaccinatedSecondDoseByPublishDate%22%7D&format=json"))
 
+
+# Main function gets data then draws a stacked bar chart
 def main():
-    first_vac_dates, second_vac_dates, first_vac_num, second_vac_num = get_data()
-    draw_chart(first_vac_dates, second_vac_dates, first_vac_num, second_vac_num)
+    vac_dates, first_vac_num, second_vac_num = get_data()
+    draw_chart(vac_dates, first_vac_num, second_vac_num)
 
 
+# Gets data from API and returns it as three lists - dates, numbers of first doses and numbers of second doses
 def get_data():
     first_vac = format_api_data((FIRST_VAC_API.json()), "First")
     second_vac = format_api_data((SECOND_VAC_API.json()), "Second")
-    first_vac_dates = list(first_vac.keys())
-    second_vac_dates = list(second_vac.keys())
+    vac_dates = list(first_vac.keys())
     first_vac_num = list(first_vac.values())
     second_vac_num = list(second_vac.values())
-    return first_vac_dates, second_vac_dates, first_vac_num, second_vac_num
+    return vac_dates, first_vac_num, second_vac_num
 
 
-def draw_chart(first_vac_dates, second_vac_dates, first_vac_num, second_vac_num):
+# Draws chart using matplotlib
+def draw_chart(vac_dates, first_vac_num, second_vac_num):
+    # sets width of bars
     width = 0.6
+    # creates chart fig/axes using mpl, then adds data and labels chart
     fig, axs = plt.subplots()
-    axs.bar(first_vac_dates, first_vac_num, width, label="First Dose")
-    axs.bar(first_vac_dates, second_vac_num, width, bottom=first_vac_num, label="Second Dose")
+    axs.bar(vac_dates, first_vac_num, width, label="First Dose")
+    axs.bar(vac_dates, second_vac_num, width, bottom=first_vac_num, label="Second Dose")
     axs.set_ylabel("Doses (in 1000s)")
     axs.set_title("Number of People Vaccinated Against COVID19 In The UK")
     axs.legend()
+    # Formats date ticks along x axis in concise/readable way using mpl ConciseDateFormatter
     locator = mdates.AutoDateLocator()
     formatter = mdates.ConciseDateFormatter(locator)
     axs.xaxis.set_major_locator(locator)
     axs.xaxis.set_major_formatter(formatter)
+    # Shows chart
     plt.show()
 
 
