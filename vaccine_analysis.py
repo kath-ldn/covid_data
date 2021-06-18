@@ -47,7 +47,7 @@ def draw_chart(vac_dates, first_vac_num, second_vac_num):
     axs.bar(vac_dates, first_vac_num, width, label="First Dose")
     axs.bar(vac_dates, second_vac_num, width, bottom=first_vac_num, label="Second Dose")
     axs.set_ylabel("Doses (in 1000s)")
-    axs.set_title("Number of People Vaccinated Against COVID19 In The UK")
+    axs.set_title("Number of People Vaccinated Against COVID19 In The UK Daily")
     axs.legend()
     # Formats date ticks along x axis in concise/readable way using mpl ConciseDateFormatter
     locator = mdates.AutoDateLocator()
